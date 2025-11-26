@@ -1,4 +1,5 @@
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) {
@@ -20,12 +21,6 @@ public class Main {
 //        System.out.println(OutlineQuadTrees);
 //        System.out.println(input);
 //        System.out.println(output);
-
-
-
-    }
-}
-
 /*
     You will receive an image le on the command line following the -i
     ag as your input: java Main -i test.ppm.
@@ -37,3 +32,18 @@ public class Main {
  For example:
 java Main -c -i test.ppm -o out
  */
+        ImageProcessor processor = new ImageProcessor(input);
+        try{
+            Image im = processor.ReadImage();
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+
+
+
+
+
+
+    }
+}
+

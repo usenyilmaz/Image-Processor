@@ -5,7 +5,12 @@ public class QuadTreeNode <P>{
     QuadTreeNode<P> northWest;
     QuadTreeNode<P> southEast;
     QuadTreeNode<P> southWest;
-    boolean state; // Durum: Düğümün bir yaprak olup olmadığını veya bölünmesi gerekip gerekmediğini gösteren bir bayrak.
+    boolean state; // Durum: Düğümün bir yaprak olup olmadığını veya bölünmesi gerekip gerekmediğini gösteren bir bayrak
+
+     public QuadTreeNode(P element, QuadTreeNode<P> parent) {
+         this.element = element;
+         this.parent = parent;
+     }
 
 
 
