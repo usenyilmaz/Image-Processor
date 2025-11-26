@@ -15,9 +15,11 @@ public class Main {
             else if(args[i].equals("-i")){input=args[i+1];}
             else if(args[i].equals("-o")){output = args[i + 1];}
         }
-
-
-
+//        System.out.println(UseEdgeDetection);
+//        System.out.println(UseQuadTree);
+//        System.out.println(OutlineQuadTrees);
+//        System.out.println(input);
+//        System.out.println(output);
 
 
 
