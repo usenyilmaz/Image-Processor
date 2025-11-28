@@ -1,16 +1,14 @@
-import java.awt.geom.QuadCurve2D;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.Scanner;
 
 public class ImageProcessor  implements ImageReader, ImageWriter {
-    String imagePath;
+    String inputImagePath;
+    String outputImagePath;
     QuadTree<Image> quadTree;
 
-    public ImageProcessor(String imagePath) {
-        this.imagePath = imagePath;
+    public ImageProcessor(String imagePath, String outputImagePath) {
+        this.inputImagePath = imagePath;
+        this.outputImagePath = outputImagePath;
         quadTree = new QuadTree<>();
     }
 
@@ -19,7 +17,7 @@ public class ImageProcessor  implements ImageReader, ImageWriter {
         FileInputStream fis = null;
         Scanner scanner = null;
 
-        File file = new File(imagePath);
+        File file = new File(inputImagePath);
         try{
             fis = new FileInputStream(file);
             scanner = new Scanner(fis);
@@ -29,7 +27,7 @@ public class ImageProcessor  implements ImageReader, ImageWriter {
 
 
         // 1. Format Kontrolü (P3 veya P6)
-        String format = scanner.next();
+        String format = scanner.nextLine();
         if (!format.equals("P3") && !format.equals("P6")) {
             throw new IOException("Desteklenmeyen PPM formatı: " + format);
         }
@@ -38,6 +36,9 @@ public class ImageProcessor  implements ImageReader, ImageWriter {
         // 2. Genişlik ve Yükseklik Oku
         int width = scanner.nextInt();
         int height = scanner.nextInt();
+
+        scanner.nextInt();
+
 
         if(width != height){
             throw new ImageIsNotSquareShaped("Image is not square shaped");
@@ -67,6 +68,33 @@ public class ImageProcessor  implements ImageReader, ImageWriter {
 
     @Override
     public void WriteImage(Image image) {
+        File file = new  File(outputImagePath);
+        try{
+            PrintWriter writer = new PrintWriter(new FileWriter(file));
+
+            writer.println("P3");
+            writer.println(image.getWidth() + " " + image.getHeight());
+            writer.println("255");
+
+            for (int y = 0; y < image.getHeight(); y++) {
+                for (int x = 0; x < image.getWidth(); x++) {
+                    Pixel p = image.getPixels()[x][y];
+
+                    // Hata: Eğer piksel null ise, doğrudan bir hata fırlatmak daha tutarlı olabilir.
+                    if (p == null) {
+                        throw new IllegalStateException("Piksel matrisi tam olarak doldurulmamış: (" + x + "," + y + ")");
+                    }
+
+                    writer.println(p.getRed() + " " + p.getGreen() + " " + p.getBlue());
+                }
+            }
+        }
+
+        catch (IOException e){
+            System.out.println("Error writing to file: WriteImage method");
+            e.printStackTrace();
+        }
+
 
     }
 }

@@ -32,9 +32,10 @@ public class Main {
  For example:
 java Main -c -i test.ppm -o out
  */
-        ImageProcessor processor = new ImageProcessor(input);
+        ImageProcessor processor = new ImageProcessor(input,output);
         try{
             Image im = processor.ReadImage();
+            processor.WriteImage(im);
         } catch(Exception e){
             e.printStackTrace();
         }

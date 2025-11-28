@@ -50,9 +50,9 @@ public class Image {
     }
     public Image NorthEastSubImage(){
         Image result = new Image(this.width / 2, this.height / 2);
-        for(int x = 0; x < this.width / 2; x++){
+        for(int x = this.width / 2; x < this.width; x++){
             for(int y = 0; y < this.height / 2; y++){
-                result.addPixel(pixels[width - x][y]);
+                result.addPixel(pixels[x][y]);
             }
         }
         return result;
@@ -60,17 +60,17 @@ public class Image {
     public Image SouthWestSubImage(){
         Image result = new Image(this.width / 2, this.height / 2);
         for(int x = 0; x < this.width / 2; x++){
-            for(int y = 0; y < this.height / 2; y++){
-                result.addPixel(pixels[x][height - y]);
+            for(int y = this.height / 2; y < this.height; y++){
+                result.addPixel(pixels[x][y]);
             }
         }
         return result;
     }
     public Image SouthEastSubImage(){
         Image result = new Image(this.width / 2, this.height / 2);
-        for(int x = 0; x < this.width / 2; x++){
-            for(int y = 0; y < this.height / 2; y++){
-                result.addPixel(pixels[width - x][height - y]);
+        for(int x = this.width / 2; x < this.width; x++){
+            for(int y = this.height / 2; y < this.height; y++){
+                result.addPixel(pixels[x][y]);
             }
         }
         return result;
