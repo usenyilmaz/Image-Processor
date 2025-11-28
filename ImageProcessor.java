@@ -1,3 +1,4 @@
+import java.awt.geom.QuadCurve2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -6,9 +7,11 @@ import java.util.Scanner;
 
 public class ImageProcessor  implements ImageReader, ImageWriter {
     String imagePath;
+    QuadTree<Image> quadTree;
 
     public ImageProcessor(String imagePath) {
         this.imagePath = imagePath;
+        quadTree = new QuadTree<>();
     }
 
     @Override
