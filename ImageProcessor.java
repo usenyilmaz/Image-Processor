@@ -51,8 +51,8 @@ public class ImageProcessor  implements ImageReader, ImageWriter {
                 int g = scanner.nextInt();
                 int b = scanner.nextInt();
 
-                System.out.println("pixel: " + (x + y));
-                System.out.println(r + "," + g + "," + b);
+//                System.out.println("pixel: " + (y * width + x));
+//                System.out.println(r + "," + g + "," + b);
 
                 Pixel p = new Pixel(r,g,b,x,y);
                 result.addPixel(p);
