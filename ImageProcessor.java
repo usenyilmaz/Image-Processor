@@ -97,6 +97,33 @@ public class ImageProcessor  implements ImageReader, ImageWriter {
 
 
     }
+
+
+    public void BuildTree (Image image, QuadTree.Node<Image> parent, int direction){
+        QuadTree.Node<Image> newnode = new QuadTree.Node<>(image);
+        if(quadTree.isEmpty()){
+            quadTree.insertRoot(newnode);
+            newnode.setNorthWest(new QuadTree.Node<>(image.NorthWestSubImage()));
+            newnode.setNorthEast(new QuadTree.Node<>(image.NorthEastSubImage()));
+            newnode.setSouthWest(new QuadTree.Node<>(image.SouthWestSubImage()));
+            newnode.setSouthEast(new QuadTree.Node<>(image.SouthEastSubImage()));
+        }
+        else{
+            quadTree.insert(newnode, parent, direction);
+
+        }
+
+//        BuildTree(image.NorthWestSubImage());
+//        BuildTree(image.NorthEastSubImage());
+//        BuildTree(image.SouthWestSubImage());
+//        BuildTree(image.SouthEastSubImage());
+
+
+    }
+
+
+
+
 }
 
 

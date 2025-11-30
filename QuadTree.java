@@ -11,7 +11,7 @@ public class QuadTree<T> {
      * Düğümleri temsil eden iç içe (inner) ve statik (static) sınıf.
      * Bu, düğümlerin QuadTree sınıfına bağlı olmadan var olmasını sağlar.
      */
-    private static class Node<T> {
+    public static class Node<T> {
         // Temsil edilen bölgenin sınırları (örneğin, bir dikdörtgen).
         // Basitlik için koordinatları tutmuyoruz, sadece yapısal bir örnek veriyoruz.
         // Gerçek bir Quadtree'de burada minX, minY, maxX, maxY gibi alanlar olur.
@@ -29,10 +29,6 @@ public class QuadTree<T> {
         // Yapıcı Metot
         public Node(T data) {
             this.data = data;
-            this.northWest = null;
-            this.northEast = null;
-            this.southWest = null;
-            this.southEast = null;
         }
 
         // --- Getter ve Setter Metotları ---
@@ -91,8 +87,22 @@ public class QuadTree<T> {
         this.root = null;
     }
 
-    public Node<T> getRoot() {
-        return root;
+    public T getRoot() {
+        return root.getData();
+    }
+
+    public boolean isEmpty(){
+        return root == null;
+    }
+
+    public void Accept(T elemenent, T NE, T NW, T SE, T SW){
+        Node<T> aux = new Node<>(elemenent);
+        aux.setNorthEast(new Node<T> (NE));
+        aux.setNorthWest(new Node<T>(NW));
+        aux.setSouthEast(new Node<T>(SE));
+        aux.setSouthWest(new Node<T>(SW));
+
+
     }
 
     /**
@@ -106,21 +116,24 @@ public class QuadTree<T> {
             System.out.println("Hata: Kök zaten mevcut. Başka bir işlem kullanın.");
         }
     }
+    public void insertRoot(Node<T> node) {
+        if (this.root == null) {
+            this.root = node;
+        }
+    }
+
+
 
     /**
      * Belirtilen ebeveyn düğüme (parent) belirli bir yöne (örneğin NW) yeni bir düğüm ekler.
      * Bu metot, Quadtree'nin bağlı (linked) yapısını gösterir.
      * * @param parent Ebeveyn düğüm.
-     * @param data Yeni düğümün verisi.
      * @param direction Ekleme yönü (1=NW, 2=NE, 3=SW, 4=SE).
      */
-    public void insert(Node<T> parent, T data, int direction) {
+    public void insert(Node<T> parent, Node<T> newNode, int direction) {
         if (parent == null) {
-            System.out.println("Hata: Ebeveyn düğüm null olamaz.");
             return;
         }
-
-        Node<T> newNode = new Node<>(data);
 
         switch (direction) {
             case 1: // North-West (KuzeyBatı)
@@ -139,7 +152,6 @@ public class QuadTree<T> {
                 System.out.println("Hata: Geçersiz yön belirtildi.");
                 return;
         }
-        System.out.println(parent.getData() + " düğümünün " + direction + ". yönüne (" + data + ") eklendi.");
     }
 
     /**
