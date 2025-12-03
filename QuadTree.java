@@ -81,6 +81,8 @@ public class QuadTree<T> {
             return northWest == null && northEast == null && southWest == null && southEast == null;
         }
 
+
+
     }
 
     // --- QuadTree Sınıfı Metotları ---
@@ -99,6 +101,10 @@ public class QuadTree<T> {
 
     public int size(){
         return size;
+    }
+
+    public void setRoot(Node<T> root) {
+        this.root = root;
     }
 
 

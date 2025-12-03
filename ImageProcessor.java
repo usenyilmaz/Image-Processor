@@ -282,6 +282,134 @@ public void BuildTree(Image image) {
         // root node için fazladan bir size artışı olabilir.
         // Bu durumu QuadTree.java'daki insertRoot metodu kontrol ederek çözebilirsiniz.
     }
+    /**
+     * Belirtilen 8 farklı sıkıştırma seviyesine (compression level) ulaşmak için
+     * Quadtree'yi inşa eder ve sıkıştırılmış görüntüleri diske yazar.
+     * Eşik değeri, iteratif bir arama (binary search benzeri) ile bulunur.
+     */
+    public void GenerateCompressedImages(Image originalImage, String outputFileNameBase) {
+        // Ödevde belirtilen hedef sıkıştırma seviyeleri
+        final double[] TARGET_LEVELS = {0.002, 0.004, 0.01, 0.033, 0.077, 0.2, 0.5, 0.65};
+        final int TOTAL_PIXELS = originalImage.getWidth() * originalImage.getHeight();
+        final int MAX_ITERATIONS = 20; // Eşiği bulmak için maksimum arama adımı
+        final double TOLERANCE = 0.0001; // Hedefe yakın sayılması için tolerans
+
+        // QuadTree'nin boyutunu (size) hesaplamak için orijinal düğüm sayısını sıfırla.
+        // NOTE: QuadTree.java'daki size değişkeni public/protected olmalı veya incrementSize() metodu kullanılmalı.
+        // Eğer size değişkenine doğrudan erişiminiz yoksa, bu kısım hata verecektir.
+
+        // Eşik değerinin alabileceği aralığı tanımla:
+        // Minimum hata 0 (siyah/beyaz bölgeler), maksimum ~195075 (3 * 255^2)
+        double globalMinThreshold = 0;
+        double globalMaxThreshold = 100000; // Geniş bir üst limit
+
+        System.out.println("--- Görüntü Sıkıştırma Başladı ---");
+
+        for (int i = 0; i < TARGET_LEVELS.length; i++) {
+            double targetLevel = TARGET_LEVELS[i];
+
+            // Her hedef için arama aralığını sıfırla
+            double minT = globalMinThreshold;
+            double maxT = globalMaxThreshold;
+            double currentThreshold = (minT + maxT) / 2;
+
+            System.out.printf("\n[Hedef %d] Aranıyor: %.4f\n", (i + 1), targetLevel);
+
+            for (int j = 0; j < MAX_ITERATIONS; j++) {
+                // Ağacı inşa et ve size'ı sıfırla. QuadTree'nizin size'ını sıfırlama metodu yoksa manuel sıfırlayın.
+                quadTree.size = 0; // Eğer QuadTree.size public ise
+
+                quadTree.setRoot(BuildCompressedTreeRecursive(originalImage, currentThreshold));
+
+                double currentLevel = (double) quadTree.size() / TOTAL_PIXELS;
+
+                // Eğer tolerans içindeyseniz, başarılı
+                if (Math.abs(currentLevel - targetLevel) <= TOLERANCE) {
+                    break;
+                }
+
+                // İkili Arama Mantığı:
+                if (currentLevel < targetLevel) {
+                    // Yaprak sayısı az (çok sıkışmış). Daha az sıkıştırma için eşiği DÜŞÜR.
+                    maxT = currentThreshold;
+                } else {
+                    // Yaprak sayısı fazla (yeterince sıkışmamış). Daha fazla sıkıştırma için eşiği YÜKSELT.
+                    minT = currentThreshold;
+                }
+                // Yeni eşik tahmini
+                currentThreshold = (minT + maxT) / 2;
+            }
+
+            // --- Görüntü Geri Oluşturma ve Çıktı ---
+            Image reconstructedImage = ReconstructImageFromQuadtree(originalImage.getWidth(), originalImage.getHeight(), quadTree.getRoot());
+
+            String outputFileName = outputFileNameBase + "-" + (i + 1) + ".ppm";
+            WriteImage(reconstructedImage); // WriteImage metodu dosya yolunu (outputImagePath) kullanmalı.
+            // Veya WriteImage(Image, String path) olarak güncelleyin.
+
+            System.out.printf("   -> Bitti. Çıktı: %s\n", outputFileName);
+            System.out.printf("      - Yaprak Sayısı: %d\n", quadTree.size());
+            System.out.printf("      - Toplam Piksel: %d\n", TOTAL_PIXELS);
+            System.out.printf("      - Elde Edilen Seviye: %.4f\n", ((double)quadTree.size() / TOTAL_PIXELS));
+        }
+    }
+
+    /**
+     * Quadtree'den sıkıştırılmış görüntüyü oluşturur.
+     * Ağaçtaki yaprak düğümlerin (compressedImage) verilerini çıktı Image nesnesine yazar.
+     */
+    public Image ReconstructImageFromQuadtree(int width, int height, QuadTree.Node<Image> rootNode) {
+        // Çıktı görüntüsünü (boş bir matris) oluştur
+        Image reconstructedImage = new Image(width, height);
+
+        // Geri oluşturmayı başlat (başlangıç koordinatları: x=0, y=0, boyut: width)
+        ReconstructRecursive(reconstructedImage, rootNode, 0, 0, width);
+
+        return reconstructedImage;
+    }
+
+    /**
+     * Görüntü rekonstrüksiyonunun özyinelemeli yardımcı metodu.
+     * @param outputImage Piksellerin yazılacağı çıktı Image nesnesi.
+     * @param currentNode Şu anki Quadtree düğümü.
+     * @param startX Current bölgenin başlangıç X koordinatı.
+     * @param startY Current bölgenin başlangıç Y koordinatı.
+     * @param size Current bölgenin boyutu (genişlik/yükseklik).
+     */
+    private void ReconstructRecursive(Image outputImage, QuadTree.Node<Image> currentNode, int startX, int startY, int size) {
+        if (currentNode == null) {
+            return;
+        }
+
+        // Eğer yaprak düğümse (sıkıştırma burada durmuşsa):
+        if (currentNode.isLeaf()) {
+            Image data = currentNode.getData();
+            Pixel meanColor = data.getPixels()[0][0]; // Sıkıştırılmış yaprakta tüm pikseller aynı (meanColor)
+
+            // Yaprak düğümün kapsadığı bölgeyi ortalama renk ile doldur.
+            for (int y = startY; y < startY + size; y++) {
+                for (int x = startX; x < startX + size; x++) {
+                    outputImage.addPixel(meanColor, x, y);
+                }
+            }
+            return;
+        }
+
+        // Eğer iç düğümse, 4 çocuğu özyinelemeli olarak dolaş
+        int halfSize = size / 2;
+
+        // NW (Kuzey-Batı)
+        ReconstructRecursive(outputImage, currentNode.getNorthWest(), startX, startY, halfSize);
+
+        // NE (Kuzey-Doğu)
+        ReconstructRecursive(outputImage, currentNode.getNorthEast(), startX + halfSize, startY, halfSize);
+
+        // SW (Güney-Batı)
+        ReconstructRecursive(outputImage, currentNode.getSouthWest(), startX, startY + halfSize, halfSize);
+
+        // SE (Güney-Doğu)
+        ReconstructRecursive(outputImage, currentNode.getSouthEast(), startX + halfSize, startY + halfSize, halfSize);
+    }
 
 
 
