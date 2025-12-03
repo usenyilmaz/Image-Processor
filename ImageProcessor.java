@@ -110,34 +110,45 @@ public class ImageProcessor  implements ImageReader, ImageWriter {
         QuadTree.Node<Image> currSW = new QuadTree.Node<>(image.SouthWestSubImage());
         QuadTree.Node<Image> currSE = new QuadTree.Node<>(image.SouthWestSubImage());
 
+
+
         quadTree.insertRoot(curr);
 
-        while(!curr.getNorthWest().getData().isPixel()){
-            quadTree.insert(curr, currNW, 1);
+        quadTree.insert(curr, currNW, 1);
+        quadTree.insert(curr, currNE, 2);
+        quadTree.insert(curr, currSW, 3);
+        quadTree.insert(curr, currSE, 4);
+
+        do{
             curr = curr.getNorthWest();
             currNW = new QuadTree.Node<>(currNW.getData().NorthWestSubImage());
-        }
+            quadTree.insert(curr, currNW, 1);
 
-        curr = new QuadTree.Node<>(image);
-        while(!curr.getNorthEast().getData().isPixel()){
-            quadTree.insert(curr, currNE, 2);
+        }while(!curr.getNorthWest().getData().isPixel());
+
+        curr = quadTree.getRoot();
+        do{
             curr = curr.getNorthEast();
             currNE = new QuadTree.Node<>(currNE.getData().NorthEastSubImage());
-        }
+            quadTree.insert(curr, currNE, 2);
 
-        curr = new QuadTree.Node<>(image);
-        while(!curr.getSouthWest().getData().isPixel()){
-            quadTree.insert(curr, currSW, 3);
+        }while(!curr.getNorthEast().getData().isPixel());
+
+        curr = quadTree.getRoot();
+        do{
             curr = curr.getSouthWest();
             currSW = new QuadTree.Node<>(currSW.getData().SouthWestSubImage());
-        }
+            quadTree.insert(curr, currSW, 3);
 
-        curr = new QuadTree.Node<>(image);
-        while(!curr.getSouthEast().getData().isPixel()){
-            quadTree.insert(curr, currSE, 4);
+        }while(!curr.getSouthWest().getData().isPixel());
+
+        curr = quadTree.getRoot();
+        do{
             curr = curr.getNorthWest();
             currSE = new QuadTree.Node<>(currSE.getData().SouthEastSubImage());
-        }
+            quadTree.insert(curr, currSE, 4);
+
+        }while(!curr.getSouthEast().getData().isPixel());
         System.out.println(quadTree.size());
 
     }

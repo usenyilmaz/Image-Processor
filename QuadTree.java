@@ -89,8 +89,8 @@ public class QuadTree<T> {
         this.root = null;
     }
 
-    public T getRoot() {
-        return root.getData();
+    public Node<T> getRoot() {
+        return root;
     }
 
     public boolean isEmpty(){
@@ -130,22 +130,42 @@ public class QuadTree<T> {
      * @param direction Ekleme yönü (1=NW, 2=NE, 3=SW, 4=SE).
      */
     public void insert(Node<T> parent, Node<T> newNode, int direction) {
-        if (parent == null) {
-            return;
-        }
+
 
         switch (direction) {
             case 1: // North-West (KuzeyBatı)
-                parent.setNorthWest(newNode);
+                if(parent.getNorthWest() == null){
+                    parent.setNorthWest(newNode);
+                }
+                else{
+                    return;
+                }
+
                 break;
             case 2: // North-East (KuzeyDoğu)
-                parent.setNorthEast(newNode);
+                if(parent.getNorthEast() == null){
+                    parent.setNorthEast(newNode);
+                }
+                else{
+                    return;
+                }
+
                 break;
             case 3: // South-West (GüneyBatı)
-                parent.setSouthWest(newNode);
+                if(parent.getSouthWest() == null){
+                    parent.setSouthWest(newNode);
+                }
+                else{
+                    return;
+                }
                 break;
             case 4: // South-East (GüneyDoğu)
-                parent.setSouthEast(newNode);
+                if(parent.getSouthEast() == null){
+                    parent.setSouthEast(newNode);
+                }
+                else{
+                    return;
+                }
                 break;
             default:
                 System.out.println("Hata: Geçersiz yön belirtildi.");
