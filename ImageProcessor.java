@@ -1,6 +1,7 @@
 import java.io.*;
 import java.util.Scanner;
 
+
 public class ImageProcessor  implements ImageReader, ImageWriter {
     String inputImagePath;
     String outputImagePath;

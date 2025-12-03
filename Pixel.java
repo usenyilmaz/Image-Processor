@@ -6,7 +6,7 @@ public class Pixel {
     private int xCor;
     private int yCor;
 
-    public Pixel(int red, int green, int blue, int xCor, int yCor) {
+    public Pixel(int red, int green, int blue, int xCor, int yCor) throws Throwable {
         this.red = red;
         this.green = green;
         this.blue = blue;
