@@ -4,7 +4,7 @@ public class QuadTree<T> {
     // Basit bir Linked Quadtree örneği olduğu için bu değeri şimdilik 1 olarak tutuyoruz.
     private static final int MAX_CAPACITY = 1;
 
-    private int size;
+    public int size;
     // Ağacın kök düğümü
     private Node<T> root;
 

@@ -99,58 +99,119 @@ public class ImageProcessor  implements ImageReader, ImageWriter {
 
     }
 
+//rezalet.
+//    public void BuildTree (Image image){
+//        //image.getPixels();
+//
+//        QuadTree.Node<Image> curr = new QuadTree.Node<>(image);
+//
+//        QuadTree.Node<Image> currNW = new QuadTree.Node<>(image.NorthWestSubImage());
+//        QuadTree.Node<Image> currNE = new QuadTree.Node<>(image.NorthEastSubImage());
+//        QuadTree.Node<Image> currSW = new QuadTree.Node<>(image.SouthWestSubImage());
+//        QuadTree.Node<Image> currSE = new QuadTree.Node<>(image.SouthWestSubImage());
+//
+//
+//
+//        quadTree.insertRoot(curr);
+//
+//        quadTree.insert(curr, currNW, 1);
+//        quadTree.insert(curr, currNE, 2);
+//        quadTree.insert(curr, currSW, 3);
+//        quadTree.insert(curr, currSE, 4);
+//
+//        do{
+//            curr = curr.getNorthWest();
+//            currNW = new QuadTree.Node<>(currNW.getData().NorthWestSubImage());
+//            quadTree.insert(curr, currNW, 1);
+//
+//        }while(!curr.getNorthWest().getData().isPixel());
+//
+//        curr = quadTree.getRoot();
+//        do{
+//            curr = curr.getNorthEast();
+//            currNE = new QuadTree.Node<>(currNE.getData().NorthEastSubImage());
+//            quadTree.insert(curr, currNE, 2);
+//
+//        }while(!curr.getNorthEast().getData().isPixel());
+//
+//        curr = quadTree.getRoot();
+//        do{
+//            curr = curr.getSouthWest();
+//            currSW = new QuadTree.Node<>(currSW.getData().SouthWestSubImage());
+//            quadTree.insert(curr, currSW, 3);
+//
+//        }while(!curr.getSouthWest().getData().isPixel());
+//
+//        curr = quadTree.getRoot();
+//        do{
+//            curr = curr.getNorthWest();
+//            currSE = new QuadTree.Node<>(currSE.getData().SouthEastSubImage());
+//            quadTree.insert(curr, currSE, 4);
+//
+//        }while(!curr.getSouthEast().getData().isPixel());
+//        System.out.println(quadTree.size());
+//
+//    }
+public void BuildTree(Image image) {
+    if (image.getWidth() != image.getHeight() || !isPowerOfTwo(image.getWidth())) {
+        System.err.println("Hata: Quadtree sadece kare ve 2'nin kuvveti boyutundaki görüntüler için oluşturulabilir.");
+        return;
+    }
 
-    public void BuildTree (Image image){
-        //image.getPixels();
+    // Ağacın kökünü, tüm görüntüyü temsil eden düğüm olarak ayarla
+    quadTree.insertRoot(BuildTreeRecursive(image));
 
-        QuadTree.Node<Image> curr = new QuadTree.Node<>(image);
+    System.out.println("Quadtree başarıyla oluşturuldu.");
+    System.out.println("Toplam Düğüm Sayısı (Beklenen 349525): " + quadTree.size());
+}
 
-        QuadTree.Node<Image> currNW = new QuadTree.Node<>(image.NorthWestSubImage());
-        QuadTree.Node<Image> currNE = new QuadTree.Node<>(image.NorthEastSubImage());
-        QuadTree.Node<Image> currSW = new QuadTree.Node<>(image.SouthWestSubImage());
-        QuadTree.Node<Image> currSE = new QuadTree.Node<>(image.SouthWestSubImage());
+    /**
+     * Quadtree'nin asıl özyinelemeli inşa mantığını yürüten yardımcı metot.
+     * @param subImage Şu anki düğümün temsil ettiği alt görüntü bölgesi.
+     * @return Yeni oluşturulan düğüm.
+     */
+    private QuadTree.Node<Image> BuildTreeRecursive(Image subImage) {
+        // Adım 1: Durma Koşulu (Base Case)
+        // Eğer alt bölge tek bir pikselden oluşuyorsa (1x1), özyinelemeyi sonlandır.
+        if (subImage.isPixel()) {
+            // Bu bir yaprak düğümdür, çocukları olmayacak.
+            // QuadTree size++ işlemi, QuadTree'deki insertRoot metodu içinde otomatik olarak yapılıyor.
+            // Bu durumda size'ı kendimiz artırmalıyız ya da farklı bir insert metodu kullanmalıyız.
+            quadTree.size++; // Boyutu manuel artır (En temiz çözüm, QuadTree size() metodunun doğru sonuç vermesi için)
+            return new QuadTree.Node<>(subImage);
+        }
 
+        // Adım 2: Özyineleme Adımı
+        // Yeni bir iç düğüm oluştur (parent)
+        QuadTree.Node<Image> parentNode = new QuadTree.Node<>(subImage);
+        quadTree.size++; // İç düğüm eklendiği için boyutu artır
 
+        // Alt bölgeleri hesapla
+        Image nw = subImage.NorthWestSubImage();
+        Image ne = subImage.NorthEastSubImage();
+        Image sw = subImage.SouthWestSubImage();
+        Image se = subImage.SouthEastSubImage();
 
-        quadTree.insertRoot(curr);
+        // Çocuk düğümleri özyinelemeli olarak inşa et ve ebeveyne bağla
 
-        quadTree.insert(curr, currNW, 1);
-        quadTree.insert(curr, currNE, 2);
-        quadTree.insert(curr, currSW, 3);
-        quadTree.insert(curr, currSE, 4);
+        // NW: KuzeyBatı
+        parentNode.setNorthWest(BuildTreeRecursive(nw));
 
-        do{
-            curr = curr.getNorthWest();
-            currNW = new QuadTree.Node<>(currNW.getData().NorthWestSubImage());
-            quadTree.insert(curr, currNW, 1);
+        // NE: KuzeyDoğu
+        parentNode.setNorthEast(BuildTreeRecursive(ne));
 
-        }while(!curr.getNorthWest().getData().isPixel());
+        // SW: GüneyBatı
+        parentNode.setSouthWest(BuildTreeRecursive(sw));
 
-        curr = quadTree.getRoot();
-        do{
-            curr = curr.getNorthEast();
-            currNE = new QuadTree.Node<>(currNE.getData().NorthEastSubImage());
-            quadTree.insert(curr, currNE, 2);
+        // SE: GüneyDoğu
+        parentNode.setSouthEast(BuildTreeRecursive(se));
 
-        }while(!curr.getNorthEast().getData().isPixel());
+        return parentNode;
+    }
 
-        curr = quadTree.getRoot();
-        do{
-            curr = curr.getSouthWest();
-            currSW = new QuadTree.Node<>(currSW.getData().SouthWestSubImage());
-            quadTree.insert(curr, currSW, 3);
-
-        }while(!curr.getSouthWest().getData().isPixel());
-
-        curr = quadTree.getRoot();
-        do{
-            curr = curr.getNorthWest();
-            currSE = new QuadTree.Node<>(currSE.getData().SouthEastSubImage());
-            quadTree.insert(curr, currSE, 4);
-
-        }while(!curr.getSouthEast().getData().isPixel());
-        System.out.println(quadTree.size());
-
+    // Gerekli yardımcı metot
+    private boolean isPowerOfTwo(int n) {
+        return (n > 0) && ((n & (n - 1)) == 0);
     }
 
 
