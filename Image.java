@@ -89,5 +89,85 @@ public class Image {
         }
         return result;
     }
+    // Bir Image bölgesindeki tüm piksellerin ortalama rengini hesaplar.
+    public Pixel calculateMeanColor() {
+        long totalR = 0;
+        long totalG = 0;
+        long totalB = 0;
+        int pixelCount = width * height;
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                Pixel p = pixels[x][y];
+                totalR += p.getRed();
+                totalG += p.getGreen();
+                totalB += p.getBlue();
+            }
+        }
+
+        // Ortalama değerleri tamsayı olarak hesapla ve 0-255 arasına sıkıştır (clamping).
+        // Ortalama 0 ile 255 arasında olacağı için clamping teorik olarak gerekmez,
+        // ancak güvenli tamsayıya çevirme önemlidir.
+        int meanR = (int) (totalR / pixelCount);
+        int meanG = (int) (totalG / pixelCount);
+        int meanB = (int) (totalB / pixelCount);
+
+        // Yeni bir Pixel nesnesi (ortalama rengi temsil eden) döndür.
+        return new Pixel(meanR, meanG, meanB);
+    }
+    /**
+     * Bu Image bölgesinin Ortalama Karesel Hatasını (Mean Squared Error - E_i) hesaplar.
+     * Hata, her pikselin rengi ile ortalama renk C_i arasındaki karesel Öklid mesafesinin ortalamasıdır.
+     * @param meanColor Bölgenin daha önce hesaplanmış ortalama rengi (Pixel nesnesi).
+     * @return Ortalama Karesel Hata değeri (double).
+     */
+    public double calculateMeanSquaredError(Pixel meanColor) {
+        long cumulativeSquaredError = 0;
+        int meanR = meanColor.getRed();
+        int meanG = meanColor.getGreen();
+        int meanB = meanColor.getBlue();
+        int pixelCount = width * height;
+
+        // Ödevde belirtilen formül: E_i = (1/N^2) * Σ |n_i(x,y) - C_i|^2 [cite: 52, 54]
+        // |n_i(x,y) - C_i|^2 = (r - C_i.r)^2 + (g - C_i.g)^2 + (b - C_i.b)^2
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                Pixel p = pixels[x][y];
+
+                // Her renk bileşeni için karesel farkı hesapla
+                long diffR = p.getRed() - meanR;
+                long diffG = p.getGreen() - meanG;
+                long diffB = p.getBlue() - meanB;
+
+                // Karesel Öklid mesafesini topla (toplam karesel hata)
+                cumulativeSquaredError += (diffR * diffR + diffG * diffG + diffB * diffB);
+            }
+        }
+
+        // Ortalama Karesel Hatayı (E_i) bulmak için toplamı piksel sayısına böl.
+        return (double) cumulativeSquaredError / pixelCount;
+    }
+    /**
+     * Görüntü nesnesinin tüm piksellerini belirtilen renk ile doldurur.
+     * Bu, sıkıştırma Quadtree'sinde bir alt bölgeyi ortalama renk ile temsil etmek için kullanılır.
+     * * @param color Tüm piksel matrisini doldurmak için kullanılacak Pixel nesnesi (genellikle ortalama renk).
+     */
+    public void fillWithColor(Pixel color) {
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                // Önemli: Eğer Image nesnesi yeni oluşturulmuşsa (pixels matrisi boşsa),
+                // buradaki atama sorun yaratmaz. Eğer matris zaten doluysa, üzerine yazar.
+                // Image sınıfınızdaki Pixel[][] pixels matrisine erişiminiz olduğunu varsayıyoruz.
+
+                // Yeni bir Pixel nesnesi oluşturarak atamak, referans yerine değer kopyalamayı sağlar.
+                // Bu, aynı Pixel nesnesinin tüm matrisi referans alması yerine, her hücrede
+                // bağımsız bir kopya olmasını sağlar, ancak bu basit senaryoda sadece atama da yeterlidir.
+                this.pixels[x][y] = color;
+            }
+        }
+    }
+
+
 }
 

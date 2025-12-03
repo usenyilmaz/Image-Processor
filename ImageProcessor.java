@@ -214,6 +214,76 @@ public void BuildTree(Image image) {
         return (n > 0) && ((n & (n - 1)) == 0);
     }
 
+    /**
+     * Sıkıştırma kriterine göre Quadtree'yi özyinelemeli olarak inşa eder.
+     * @param subImage Şu anki düğümün temsil ettiği alt görüntü bölgesi.
+     * @param threshold Sıkıştırma için kullanılan hata eşiği.
+     * @return Yeni oluşturulan düğüm.
+     */
+    private QuadTree.Node<Image> BuildCompressedTreeRecursive(Image subImage, double threshold) {
+        // Adım 1: Durma Koşulları (Base Cases)
+
+        // A. Tek piksele ulaşıldı (Quadtree'de daha fazla bölme yapılamaz.)
+        if (subImage.isPixel()) {
+            quadTree.size++; // Düğüm sayısını artır
+            // Düğümün verisi olarak Orijinal Piksel kullanılır.
+            return new QuadTree.Node<>(subImage);
+        }
+
+        // B. Ortalama Hata Eşiğin Altında (Sıkıştırma Kriteri)
+
+        // 1. Ortalama Rengi Hesapla (C_i)
+        Pixel meanColor = subImage.calculateMeanColor();
+        // 2. Ortalama Karesel Hatayı Hesapla (E_i)
+        double error = subImage.calculateMeanSquaredError(meanColor);
+
+        // Eğer hata eşiğin altındaysa, bölmeyi durdur.
+        if (error <= threshold) {
+            quadTree.size++; // Düğüm sayısını artır
+
+            // Bu, sıkıştırılmış görüntünün rengini saklayacak yaprak düğümdür.
+            // Ödev yönergesine göre düğüm, alt bölgenin ortalama rengini saklamalıdır. [cite: 37, 46]
+            Image compressedImage = new Image(subImage.getWidth(), subImage.getHeight());
+            compressedImage.fillWithColor(meanColor); // Eğer Image sınıfınızda böyle bir metot yoksa Image nesnesini meanColor ile oluşturun.
+
+            return new QuadTree.Node<>(compressedImage);
+        }
+
+        // Adım 2: Özyineleme Adımı (Hata Eşiğin Üzerinde)
+
+        // Yeni bir iç düğüm oluştur (parent)
+        QuadTree.Node<Image> parentNode = new QuadTree.Node<>(subImage); // Buraya meanColor'u da atayabilirsiniz.
+        quadTree.size++;
+
+        // Çocuk düğümleri özyinelemeli olarak inşa et ve ebeveyne bağla
+        parentNode.setNorthWest(BuildCompressedTreeRecursive(subImage.NorthWestSubImage(), threshold));
+        parentNode.setNorthEast(BuildCompressedTreeRecursive(subImage.NorthEastSubImage(), threshold));
+        parentNode.setSouthWest(BuildCompressedTreeRecursive(subImage.SouthWestSubImage(), threshold));
+        parentNode.setSouthEast(BuildCompressedTreeRecursive(subImage.SouthEastSubImage(), threshold));
+
+        return parentNode;
+    }
+
+
+    // Ana Build metodu, komut satırı ile çağrılacak.
+    public void BuildCompressedTree(Image image, double threshold) {
+        if (image.getWidth() != image.getHeight() || !isPowerOfTwo(image.getWidth())) {
+            System.err.println("Hata: Quadtree sadece kare ve 2'nin kuvveti boyutundaki görüntüler için oluşturulabilir.");
+            return;
+        }
+
+        // Önceki sıkıştırma ağacının boyutunu sıfırla
+        quadTree.size = 0;
+
+        // Ağacın kökünü ayarla
+        quadTree.insertRoot(BuildCompressedTreeRecursive(image, threshold));
+
+        // quadTree.insertRoot() metodu da size'ı 1 artırdığı için,
+        // root node için fazladan bir size artışı olabilir.
+        // Bu durumu QuadTree.java'daki insertRoot metodu kontrol ederek çözebilirsiniz.
+    }
+
+
 
 
 
