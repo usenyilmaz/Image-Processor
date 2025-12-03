@@ -4,6 +4,7 @@ public class QuadTree<T> {
     // Basit bir Linked Quadtree örneği olduğu için bu değeri şimdilik 1 olarak tutuyoruz.
     private static final int MAX_CAPACITY = 1;
 
+    private int size;
     // Ağacın kök düğümü
     private Node<T> root;
 
@@ -11,7 +12,7 @@ public class QuadTree<T> {
      * Düğümleri temsil eden iç içe (inner) ve statik (static) sınıf.
      * Bu, düğümlerin QuadTree sınıfına bağlı olmadan var olmasını sağlar.
      */
-    public static class Node<T> {
+    protected static class Node<T> {
         // Temsil edilen bölgenin sınırları (örneğin, bir dikdörtgen).
         // Basitlik için koordinatları tutmuyoruz, sadece yapısal bir örnek veriyoruz.
         // Gerçek bir Quadtree'de burada minX, minY, maxX, maxY gibi alanlar olur.
@@ -79,6 +80,7 @@ public class QuadTree<T> {
         public boolean isLeaf() {
             return northWest == null && northEast == null && southWest == null && southEast == null;
         }
+
     }
 
     // --- QuadTree Sınıfı Metotları ---
@@ -95,15 +97,10 @@ public class QuadTree<T> {
         return root == null;
     }
 
-    public void Accept(T elemenent, T NE, T NW, T SE, T SW){
-        Node<T> aux = new Node<>(elemenent);
-        aux.setNorthEast(new Node<T> (NE));
-        aux.setNorthWest(new Node<T>(NW));
-        aux.setSouthEast(new Node<T>(SE));
-        aux.setSouthWest(new Node<T>(SW));
-
-
+    public int size(){
+        return size;
     }
+
 
     /**
      * Ağaca kök düğüm olarak bir veri ekler (Ağaç boşsa).
@@ -115,11 +112,13 @@ public class QuadTree<T> {
         } else {
             System.out.println("Hata: Kök zaten mevcut. Başka bir işlem kullanın.");
         }
+        size++;
     }
     public void insertRoot(Node<T> node) {
         if (this.root == null) {
             this.root = node;
         }
+        size++;
     }
 
 
@@ -152,6 +151,7 @@ public class QuadTree<T> {
                 System.out.println("Hata: Geçersiz yön belirtildi.");
                 return;
         }
+        size++;
     }
 
     /**

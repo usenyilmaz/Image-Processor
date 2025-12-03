@@ -36,10 +36,21 @@ java Main -c -i test.ppm -o out
         try{
             Image im = processor.ReadImage();
             processor.WriteImage(im);
-        } catch(Exception e){
-            e.printStackTrace();
+            processor.BuildTree(im);
+
+
+
+
         }
 
+
+
+
+
+
+        catch(Exception e){
+            e.printStackTrace();
+        }
 
 
 

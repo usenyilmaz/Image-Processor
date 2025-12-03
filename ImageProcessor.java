@@ -59,8 +59,8 @@ public class ImageProcessor  implements ImageReader, ImageWriter {
 //                System.out.println("pixel: " + (y * width + x));
 //                System.out.println(r + "," + g + "," + b);
 
-                Pixel p = new Pixel(r,g,b,x,y);
-                result.addPixel(p);
+                Pixel p = new Pixel(r,g,b);
+                result.addPixel(p, x, y);
 
             }
         }
@@ -100,25 +100,45 @@ public class ImageProcessor  implements ImageReader, ImageWriter {
     }
 
 
-    public void BuildTree (Image image, QuadTree.Node<Image> parent, int direction){
-        QuadTree.Node<Image> newnode = new QuadTree.Node<>(image);
-        if(quadTree.isEmpty()){
-            quadTree.insertRoot(newnode);
-            newnode.setNorthWest(new QuadTree.Node<>(image.NorthWestSubImage()));
-            newnode.setNorthEast(new QuadTree.Node<>(image.NorthEastSubImage()));
-            newnode.setSouthWest(new QuadTree.Node<>(image.SouthWestSubImage()));
-            newnode.setSouthEast(new QuadTree.Node<>(image.SouthEastSubImage()));
+    public void BuildTree (Image image){
+        //image.getPixels();
+
+        QuadTree.Node<Image> curr = new QuadTree.Node<>(image);
+
+        QuadTree.Node<Image> currNW = new QuadTree.Node<>(image.NorthWestSubImage());
+        QuadTree.Node<Image> currNE = new QuadTree.Node<>(image.NorthEastSubImage());
+        QuadTree.Node<Image> currSW = new QuadTree.Node<>(image.SouthWestSubImage());
+        QuadTree.Node<Image> currSE = new QuadTree.Node<>(image.SouthWestSubImage());
+
+        quadTree.insertRoot(curr);
+
+        while(!curr.getNorthWest().getData().isPixel()){
+            quadTree.insert(curr, currNW, 1);
+            curr = curr.getNorthWest();
+            currNW = new QuadTree.Node<>(currNW.getData().NorthWestSubImage());
         }
-        else{
-            quadTree.insert(newnode, parent, direction);
 
+        curr = new QuadTree.Node<>(image);
+        while(!curr.getNorthEast().getData().isPixel()){
+            quadTree.insert(curr, currNE, 2);
+            curr = curr.getNorthEast();
+            currNE = new QuadTree.Node<>(currNE.getData().NorthEastSubImage());
         }
 
-//        BuildTree(image.NorthWestSubImage());
-//        BuildTree(image.NorthEastSubImage());
-//        BuildTree(image.SouthWestSubImage());
-//        BuildTree(image.SouthEastSubImage());
+        curr = new QuadTree.Node<>(image);
+        while(!curr.getSouthWest().getData().isPixel()){
+            quadTree.insert(curr, currSW, 3);
+            curr = curr.getSouthWest();
+            currSW = new QuadTree.Node<>(currSW.getData().SouthWestSubImage());
+        }
 
+        curr = new QuadTree.Node<>(image);
+        while(!curr.getSouthEast().getData().isPixel()){
+            quadTree.insert(curr, currSE, 4);
+            curr = curr.getNorthWest();
+            currSE = new QuadTree.Node<>(currSE.getData().SouthEastSubImage());
+        }
+        System.out.println(quadTree.size());
 
     }
 
