@@ -115,7 +115,6 @@ public void BuildTree(Image image) {
 
     /**
      * Quadtree'nin asıl özyinelemeli inşa mantığını yürüten yardımcı metot.
-     * @param subImage Şu anki düğümün temsil ettiği alt görüntü bölgesi.
      * @return Yeni oluşturulan düğüm.
      */
     private QuadTree.Node<Image> BuildTreeRecursive(Image subImage) {
@@ -158,17 +157,17 @@ public void BuildTree(Image image) {
     }
 
     // Gerekli yardımcı metot
-    private boolean isPowerOfTwo(int n) {
+    public boolean isPowerOfTwo(int n) {
         return (n > 0) && ((n & (n - 1)) == 0);
     }
 
     /**
      * Sıkıştırma kriterine göre Quadtree'yi özyinelemeli olarak inşa eder.
-     * @param subImage Şu anki düğümün temsil ettiği alt görüntü bölgesi.
+     anki düğümün temsil ettiği alt görüntü bölgesi.
      * @param threshold Sıkıştırma için kullanılan hata eşiği.
      * @return Yeni oluşturulan düğüm.
      */
-    private QuadTree.Node<Image> BuildCompressedTreeRecursive(Image subImage, double threshold) {
+    public QuadTree.Node<Image> BuildCompressedTreeRecursive(Image subImage, double threshold) {
         // Adım 1: Durma Koşulları (Base Cases)
 
         // A. Tek piksele ulaşıldı (Quadtree'de daha fazla bölme yapılamaz.)
@@ -278,7 +277,6 @@ public void BuildTree(Image image) {
 
                 // İkili Arama Mantığı:
                 if (currentLevel < targetLevel) {
-                    // Yaprak sayısı az (çok sıkışmış). Daha az sıkıştırma için eşiği DÜŞÜR.
                     maxT = currentThreshold;
                 } else {
                     // Yaprak sayısı fazla (yeterince sıkışmamış). Daha fazla sıkıştırma için eşiği YÜKSELT.
@@ -319,7 +317,6 @@ public void BuildTree(Image image) {
     /**
      * Görüntü rekonstrüksiyonunun özyinelemeli yardımcı metodu.
      * @param outputImage Piksellerin yazılacağı çıktı Image nesnesi.
-     * @param currentNode Şu anki Quadtree düğümü.
      * @param startX Current bölgenin başlangıç X koordinatı.
      * @param startY Current bölgenin başlangıç Y koordinatı.
      * @param size Current bölgenin boyutu (genişlik/yükseklik).
