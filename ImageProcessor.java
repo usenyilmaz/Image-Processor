@@ -68,8 +68,8 @@ public class ImageProcessor  implements ImageReader, ImageWriter {
     }
 
     @Override
-    public void WriteImage(Image image) {
-        File file = new  File(outputImagePath);
+    public void WriteImage(Image image, String path) {
+        File file = new  File(path);
         try{
             PrintWriter writer = new PrintWriter(new FileWriter(file));
 
@@ -99,59 +99,7 @@ public class ImageProcessor  implements ImageReader, ImageWriter {
 
     }
 
-//rezalet.
-//    public void BuildTree (Image image){
-//        //image.getPixels();
-//
-//        QuadTree.Node<Image> curr = new QuadTree.Node<>(image);
-//
-//        QuadTree.Node<Image> currNW = new QuadTree.Node<>(image.NorthWestSubImage());
-//        QuadTree.Node<Image> currNE = new QuadTree.Node<>(image.NorthEastSubImage());
-//        QuadTree.Node<Image> currSW = new QuadTree.Node<>(image.SouthWestSubImage());
-//        QuadTree.Node<Image> currSE = new QuadTree.Node<>(image.SouthWestSubImage());
-//
-//
-//
-//        quadTree.insertRoot(curr);
-//
-//        quadTree.insert(curr, currNW, 1);
-//        quadTree.insert(curr, currNE, 2);
-//        quadTree.insert(curr, currSW, 3);
-//        quadTree.insert(curr, currSE, 4);
-//
-//        do{
-//            curr = curr.getNorthWest();
-//            currNW = new QuadTree.Node<>(currNW.getData().NorthWestSubImage());
-//            quadTree.insert(curr, currNW, 1);
-//
-//        }while(!curr.getNorthWest().getData().isPixel());
-//
-//        curr = quadTree.getRoot();
-//        do{
-//            curr = curr.getNorthEast();
-//            currNE = new QuadTree.Node<>(currNE.getData().NorthEastSubImage());
-//            quadTree.insert(curr, currNE, 2);
-//
-//        }while(!curr.getNorthEast().getData().isPixel());
-//
-//        curr = quadTree.getRoot();
-//        do{
-//            curr = curr.getSouthWest();
-//            currSW = new QuadTree.Node<>(currSW.getData().SouthWestSubImage());
-//            quadTree.insert(curr, currSW, 3);
-//
-//        }while(!curr.getSouthWest().getData().isPixel());
-//
-//        curr = quadTree.getRoot();
-//        do{
-//            curr = curr.getNorthWest();
-//            currSE = new QuadTree.Node<>(currSE.getData().SouthEastSubImage());
-//            quadTree.insert(curr, currSE, 4);
-//
-//        }while(!curr.getSouthEast().getData().isPixel());
-//        System.out.println(quadTree.size());
-//
-//    }
+
 public void BuildTree(Image image) {
     if (image.getWidth() != image.getHeight() || !isPowerOfTwo(image.getWidth())) {
         System.err.println("Hata: Quadtree sadece kare ve 2'nin kuvveti boyutundaki görüntüler için oluşturulabilir.");
@@ -344,7 +292,7 @@ public void BuildTree(Image image) {
             Image reconstructedImage = ReconstructImageFromQuadtree(originalImage.getWidth(), originalImage.getHeight(), quadTree.getRoot());
 
             String outputFileName = outputFileNameBase + "-" + (i + 1) + ".ppm";
-            WriteImage(reconstructedImage); // WriteImage metodu dosya yolunu (outputImagePath) kullanmalı.
+            WriteImage(reconstructedImage, outputFileName); // WriteImage metodu dosya yolunu (outputImagePath) kullanmalı.
             // Veya WriteImage(Image, String path) olarak güncelleyin.
 
             System.out.printf("   -> Bitti. Çıktı: %s\n", outputFileName);

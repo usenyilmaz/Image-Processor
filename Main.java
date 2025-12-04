@@ -34,21 +34,40 @@ java Main -c -i test.ppm -o out
  */
         ImageProcessor processor = new ImageProcessor(input,output);
         try{
-            Image im = processor.ReadImage();
-            processor.WriteImage(im);
-            processor.BuildTree(im);
+            Image originalImage = processor.ReadImage();
 
+            if(UseQuadTree){
+                processor.GenerateCompressedImages(originalImage, output);
+            }
+            else if (UseEdgeDetection) { // -e bayrağı: Kenar Tespiti
 
+            // Adım 1: Kenar Tespiti için Quadtree'yi inşa et (threshold ile)
+            // Kenar tespiti için tek bir threshold bulmanız gerekecek.
+            // processor.BuildEdgeDetectionTree(originalImage, EDGE_THRESHOLD);
 
+            // Adım 2: Filtreyi sadece küçük düğümlere uygulayarak görüntüyü oluştur
+            // Image resultImage = processor.ApplyEdgeDetection(originalImage);
+
+            // Adım 3: Eğer -t varsa, Quadtree çerçevesini çiz
+            if (OutlineQuadTrees) {
+                // processor.DrawQuadtreeOutline(resultImage, processor.getQuadTree().getRoot());
+            }
+
+            // Adım 4: Tek bir çıktı dosyasına yaz
+            // processor.WriteImage(resultImage, output);
 
         }
 
 
+            else {
+                // Eğer -c veya -e yoksa, varsayılan olarak ne yapılacağı (örneğin sadece okunan görüntüyü yaz)
+                System.out.println("Hata: -c (sıkıştırma) veya -e (kenar tespiti) bayrağı belirtilmedi.");
+                // processor.WriteImage(originalImage, output); // Sadece test amaçlı, okunanı yazar.
+            }
 
 
 
-
-        catch(Exception e){
+        } catch(Exception e){
             e.printStackTrace();
         }
 
