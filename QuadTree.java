@@ -87,6 +87,10 @@ public class QuadTree<T> {
 
     // --- QuadTree Sınıfı Metotları ---
 
+    public void resetSize(){
+        size = 0;
+    }
+
     public QuadTree() {
         this.root = null;
     }
