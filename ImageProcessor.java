@@ -457,13 +457,22 @@ public void BuildTree(Image image) {
         }
 
         // Sonucu 0-255 arasına sıkıştır (Clamping)
+
+
+        final double GAIN = 2.0; // Deneme amaçlı 2 katına çıkarın (Görüntüye göre ayarlanabilir)
+
+        newR *= GAIN;
+        newG *= GAIN;
+        newB *= GAIN;
+
+        // Sonucu 0-255 arasına sıkıştır (Clamping)
         int finalR = (int) Math.min(255, Math.max(0, newR));
         int finalG = (int) Math.min(255, Math.max(0, newG));
         int finalB = (int) Math.min(255, Math.max(0, newB));
-
-
+        // ... (finalG ve finalB için aynı clamping işlemi)
 
         return new Pixel(finalR, finalG, finalB);
+
     }
 
     /**
