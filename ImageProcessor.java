@@ -461,6 +461,8 @@ public void BuildTree(Image image) {
         int finalG = (int) Math.min(255, Math.max(0, newG));
         int finalB = (int) Math.min(255, Math.max(0, newB));
 
+
+
         return new Pixel(finalR, finalG, finalB);
     }
 
