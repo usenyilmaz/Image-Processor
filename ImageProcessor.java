@@ -359,7 +359,171 @@ public void BuildTree(Image image) {
         ReconstructRecursive(outputImage, currentNode.getSouthEast(), startX + halfSize, startY + halfSize, halfSize);
     }
 
+    /**
+     * Verilen Quadtree'yi dolaşarak her yaprak düğümün sınırlarını çıktı görüntüsünün
+     * üzerine çizer (Quadtree çerçevesi - '-t' bayrağı).
+     * * @param outputImage Çizgilerin üzerine çizileceği Image nesnesi.
+     * @param rootNode Quadtree'nin kök düğümü.
+     */
+    public void DrawQuadtreeOutline(Image outputImage, QuadTree.Node<Image> rootNode) {
+        Pixel outlineColor = new Pixel(0, 0, 0); // Siyah renk
+        DrawOutlineRecursive(outputImage, rootNode, 0, 0, outputImage.getWidth(), outlineColor);
+    }
 
+    /**
+     * Çerçeveleme işleminin özyinelemeli yardımcı metodu.
+     */
+    private void DrawOutlineRecursive(Image outputImage, QuadTree.Node<Image> currentNode, int startX, int startY, int size, Pixel color) {
+        if (currentNode == null) {
+            return;
+        }
+
+        // A. Durma Koşulu: Yaprak Düğüm (Split burada durmuştur)
+        if (currentNode.isLeaf()) {
+            // Yaprak düğümün sınırlarını çiz
+
+            // Üst yatay çizgi (startX'tan startX+size'a)
+            for (int x = startX; x < startX + size; x++) {
+                // outputImage.addPixel(color, x, startY); // Sadece üst çizgi
+                outputImage.addPixel(color, x, startY);
+                if (startY + size - 1 < outputImage.getHeight()) {
+                    outputImage.addPixel(color, x, startY + size - 1); // Alt çizgi
+                }
+            }
+
+            // Sol dikey çizgi (startY'den startY+size'a)
+            for (int y = startY; y < startY + size; y++) {
+                // outputImage.addPixel(color, startX, y); // Sadece sol çizgi
+                outputImage.addPixel(color, startX, y);
+                if (startX + size - 1 < outputImage.getWidth()) {
+                    outputImage.addPixel(color, startX + size - 1, y); // Sağ çizgi
+                }
+            }
+            return;
+        }
+
+        // B. Özyineleme Adımı: İç Düğüm (Bölmeye devam et)
+        int halfSize = size / 2;
+
+        // NW (Kuzey-Batı)
+        DrawOutlineRecursive(outputImage, currentNode.getNorthWest(), startX, startY, halfSize, color);
+
+        // NE (Kuzey-Doğu)
+        DrawOutlineRecursive(outputImage, currentNode.getNorthEast(), startX + halfSize, startY, halfSize, color);
+
+        // SW (Güney-Batı)
+        DrawOutlineRecursive(outputImage, currentNode.getSouthWest(), startX, startY + halfSize, halfSize, color);
+
+        // SE (Güney-Doğu)
+        DrawOutlineRecursive(outputImage, currentNode.getSouthEast(), startX + halfSize, startY + halfSize, halfSize, color);
+    }
+
+    /**
+     * 3x3 Edge Detection (Laplace) filtresini verilen bölgenin merkez pikseline uygular.
+     * @param image Bölgeyi içeren Image nesnesi.
+     * @param x Merkez pikselin X koordinatı.
+     * @param y Merkez pikselin Y koordinatı.
+     * @return Yeni, filtrelenmiş Pixel (RGB değerleri 0-255 arasına sıkıştırılmış).
+     */
+    private Pixel applyEdgeDetectionFilter(Image image, int x, int y) {
+        // 3x3 Laplace Kenar Tespiti Çekirdeği
+        int[] kernel = {
+                -1, -1, -1,
+                -1, 8, -1,
+                -1, -1, -1
+        };
+
+        long newR = 0;
+        long newG = 0;
+        long newB = 0;
+        int k = 0;
+
+        // 3x3 komşuluğu dolaş
+        for (int dy = -1; dy <= 1; dy++) {
+            for (int dx = -1; dx <= 1; dx++) {
+                int currentX = x + dx;
+                int currentY = y + dy;
+
+                // Sınır kontrolü: Görüntü sınırlarının dışındaysa, merkezi pikseli kullan (genellikle 0 veya merkez piksel kullanılır)
+                // Basitlik için, sınır dışındaki pikselleri 0 (siyah) kabul edebiliriz
+                // Veya ödevde belirtildiği gibi sadece filtrelenecek alanı kullanırız (daha sonra ele alınacak).
+                if (currentX >= 0 && currentX < image.getWidth() && currentY >= 0 && currentY < image.getHeight()) {
+                    Pixel p = image.getPixels()[currentX][currentY];
+                    int weight = kernel[k];
+
+                    newR += p.getRed() * weight;
+                    newG += p.getGreen() * weight;
+                    newB += p.getBlue() * weight;
+                }
+                k++;
+            }
+        }
+
+        // Sonucu 0-255 arasına sıkıştır (Clamping)
+        int finalR = (int) Math.min(255, Math.max(0, newR));
+        int finalG = (int) Math.min(255, Math.max(0, newG));
+        int finalB = (int) Math.min(255, Math.max(0, newB));
+
+        return new Pixel(finalR, finalG, finalB);
+    }
+
+    /**
+     * Kenar tespiti filtresini Quadtree yapısına göre uygular.
+     * Sadece yeterince küçük düğümlere (örneğin size <= 8) filtre uygular, diğerlerini siyah yapar.
+     * * @param image Orijinal görüntü.
+     * @param rootNode Kenar tespiti için kullanılan Quadtree'nin kökü (sıkıştırılmış ağaç).
+     * @param minSize Filtrenin uygulanacağı en küçük bölge boyutu (örneğin 8).
+     * @return Kenar tespiti uygulanmış Image nesnesi.
+     */
+    public Image ApplyEdgeDetection(Image originalImage, QuadTree.Node<Image> rootNode, int minSize) {
+        Image resultImage = new Image(originalImage.getWidth(), originalImage.getHeight());
+        ApplyEdgeDetectionRecursive(originalImage, resultImage, rootNode, 0, 0, originalImage.getWidth(), minSize);
+        return resultImage;
+    }
+
+    private void ApplyEdgeDetectionRecursive(Image originalImage, Image outputImage, QuadTree.Node<Image> currentNode, int startX, int startY, int size, int minSize) {
+        if (currentNode == null) {
+            return;
+        }
+
+        if (currentNode.isLeaf() || size <= minSize) {
+            // Yaprak düğümse veya boyutu filtrelenecek kadar küçükse (kriteri minSize):
+
+            if (size <= minSize) {
+                // Filtreyi bu bölgedeki piksellere uygula
+                for (int y = startY; y < startY + size; y++) {
+                    for (int x = startX; x < startX + size; x++) {
+
+                        // Not: 3x3 filtre, sınır bölgelerde (kenarlarda) sorun çıkarır.
+                        // Sınır pikselleri için basitlik adına kopyalama yapılabilir.
+                        if (x > 0 && x < originalImage.getWidth() - 1 && y > 0 && y < originalImage.getHeight() - 1) {
+                            Pixel filteredPixel = applyEdgeDetectionFilter(originalImage, x, y);
+                            outputImage.addPixel(filteredPixel, x, y);
+                        } else {
+                            // Sınır piksellerini siyah yap
+                            outputImage.addPixel(new Pixel(0, 0, 0), x, y);
+                        }
+                    }
+                }
+            } else {
+                // Yaprak düğüm, ancak minSize'dan büyük (Threshold nedeniyle bölme durdu) -> Siyah yap
+                Pixel black = new Pixel(0, 0, 0);
+                for (int y = startY; y < startY + size; y++) {
+                    for (int x = startX; x < startX + size; x++) {
+                        outputImage.addPixel(black, x, y);
+                    }
+                }
+            }
+            return;
+        }
+
+        // İç düğümse, bölmeye devam et
+        int halfSize = size / 2;
+        ApplyEdgeDetectionRecursive(originalImage, outputImage, currentNode.getNorthWest(), startX, startY, halfSize, minSize);
+        ApplyEdgeDetectionRecursive(originalImage, outputImage, currentNode.getNorthEast(), startX + halfSize, startY, halfSize, minSize);
+        ApplyEdgeDetectionRecursive(originalImage, outputImage, currentNode.getSouthWest(), startX, startY + halfSize, halfSize, minSize);
+        ApplyEdgeDetectionRecursive(originalImage, outputImage, currentNode.getSouthEast(), startX + halfSize, startY + halfSize, halfSize, minSize);
+    }
 
 
 
