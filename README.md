@@ -47,12 +47,12 @@ java Main -i kira.ppm -o edge_framed -e -t
 Output file: edge_framed.ppm
 
 # Bugs and Limitations
-**Input Image Requirements** 
+**Input Image Requirements:** 
 The program mandates that the input image must be square and its dimension must be a power of two (e.g., $256 \times 256$, $512 \times 512$). Non-compliant images will result in an error and termination.
 
-**Fixed Threshold Search**
+**Fixed Threshold Search:**
 In compression mode (-c), the iterative threshold search relies on a fixed number of iterations (MAX_ITERATIONS) and pre-set search bounds (globalMaxThreshold). For images with extremely high or low color variance, these bounds might need manual adjustment to accurately hit the target compression levels.
 
-**Memory Efficiency**
+**Memory Efficiency:**
 The Quadtree is built using linked nodes, and every node stores an Image object representing its region. For large images, this design is memory-intensive, as it duplicates pixel data across many nodes in the tree. An optimized version would store only the boundaries/coordinates within the nodes.
 
