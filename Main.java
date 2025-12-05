@@ -59,7 +59,7 @@ public class Main {
                 // 1. Kenar tespiti için kullanılacak Quadtree'yi inşa et.
                 // Ödev, kenar tespiti için de uygun bir eşik seçilmesini istiyor.
                 // Örneğin, yüksek kontrastı yakalamak için nispeten düşük bir eşik kullanabiliriz (deneysel değer).
-                final double EDGE_THRESHOLD = 5000.0; // DENEYSEL DEgER: Görüntüye göre ayarlanmalı
+                final double EDGE_THRESHOLD = 4000.0; // DENEYSEL DEgER: Görüntüye göre ayarlanmalı
                 final int MIN_FILTER_SIZE = 8; // Filtre uygulanacak maksimum bölge boyutu (8x8)
 
                 System.out.println("Kenar Tespiti Quadtree'si oluşturuluyor...");

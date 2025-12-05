@@ -35,13 +35,13 @@ public class Image {
 
     // ... Image.java içindeki diğer metotlar ...
 
-    // isPixel() metodu da boyut kontrolü yapmalı:
+
     public boolean isPixel(){
         // Pixels matrisi var mı ve 1x1 boyutunda mı?
         return this.width == 1 && this.height == 1;
     }
 
-    // ... NorthWestSubImage metodu doğru (değiştirilmedi) ...
+
     public Image NorthWestSubImage(){
         Image result = new Image(this.width / 2, this.height / 2);
         for(int x = 0; x < this.width / 2; x++){
@@ -59,7 +59,6 @@ public class Image {
         int halfH = this.height / 2;
         for(int x = 0; x < halfW; x++){
             for(int y = 0; y < halfH; y++){
-                // Düzeltme: X koordinatı (halfW + x) olmalı, (width - x) değil.
                 result.addPixel(pixels[halfW + x][y], x, y);
             }
         }
@@ -71,7 +70,6 @@ public class Image {
         int halfH = this.height / 2;
         for(int x = 0; x < halfW; x++){
             for(int y = 0; y < halfH; y++){
-                // Düzeltme: Y koordinatı (halfH + y) olmalı, (height - y) değil.
                 result.addPixel(pixels[x][halfH + y], x ,y);
             }
         }
@@ -83,7 +81,6 @@ public class Image {
         int halfH = this.height / 2;
         for(int x = 0; x < halfW; x++){
             for(int y = 0; y < halfH; y++){
-                // Düzeltme: Hem X (halfW + x) hem de Y (halfH + y) ofsetlenmeli.
                 result.addPixel(pixels[halfW + x][halfH + y], x, y);
             }
         }
