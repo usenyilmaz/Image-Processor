@@ -363,7 +363,7 @@ public void BuildTree(Image image) {
      * @param rootNode Quadtree'nin kök düğümü.
      */
     public void DrawQuadtreeOutline(Image outputImage, QuadTree.Node<Image> rootNode) {
-        Pixel outlineColor = new Pixel(0, 0, 0); // Siyah renk
+        Pixel outlineColor = new Pixel(255, 255, 255); // Siyah renk
         DrawOutlineRecursive(outputImage, rootNode, 0, 0, outputImage.getWidth(), outlineColor);
     }
 
@@ -381,7 +381,7 @@ public void BuildTree(Image image) {
 
             // Üst yatay çizgi (startX'tan startX+size'a)
             for (int x = startX; x < startX + size; x++) {
-                // outputImage.addPixel(color, x, startY); // Sadece üst çizgi
+                outputImage.addPixel(color, x, startY); // Sadece üst çizgi
                 outputImage.addPixel(color, x, startY);
                 if (startY + size - 1 < outputImage.getHeight()) {
                     outputImage.addPixel(color, x, startY + size - 1); // Alt çizgi
@@ -390,7 +390,7 @@ public void BuildTree(Image image) {
 
             // Sol dikey çizgi (startY'den startY+size'a)
             for (int y = startY; y < startY + size; y++) {
-                // outputImage.addPixel(color, startX, y); // Sadece sol çizgi
+                outputImage.addPixel(color, startX, y); // Sadece sol çizgi
                 outputImage.addPixel(color, startX, y);
                 if (startX + size - 1 < outputImage.getWidth()) {
                     outputImage.addPixel(color, startX + size - 1, y); // Sağ çizgi
@@ -459,7 +459,7 @@ public void BuildTree(Image image) {
         // Sonucu 0-255 arasına sıkıştır (Clamping)
 
 
-        final double GAIN = 2.0; // Deneme amaçlı 2 katına çıkarın (Görüntüye göre ayarlanabilir)
+        final double GAIN = 3.0; // Deneme amaçlı 2 katına çıkarın (Görüntüye göre ayarlanabilir)
 
         newR *= GAIN;
         newG *= GAIN;
